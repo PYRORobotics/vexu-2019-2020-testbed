@@ -43,7 +43,7 @@ class Profile
     std::string drive_type;
     std::map<std::string, std::pair<pros::Controller*, controller_input> >button_map;
     void set_layout(std::string profile_file_name);
-    Profile(std::string profile_file_name = "Default");
+    Profile(std::string profile_file_name = "profile-Default");
 };
 
 extern Profile Active_Profile;

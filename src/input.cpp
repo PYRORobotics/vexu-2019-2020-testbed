@@ -1,5 +1,5 @@
-#include <fstream>
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include "input.hpp"
 
 pros::Controller Controller_1(pros::E_CONTROLLER_MASTER);
@@ -8,8 +8,8 @@ Profile Active_Profile;
 
 std::string action_list[]
 {
-  "a", // Action 1
-  "b" // Action 2
+  "Drive 1", // Action 1
+  "Drive 2" // Action 2
 };
 
 std::map<controller_input, int> controller_1_values;
@@ -19,12 +19,14 @@ std::map<controller_input, int> controller_2_values;
 
 void update_controller_values(void *)
 {
+  while(1){
+
   // Controller 1
   // Analog Joysticks
   controller_1_values[LX] = Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
   controller_1_values[LY] = Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-  controller_1_values[RX] = Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
-  controller_1_values[RY] = Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+  controller_1_values[RX] = Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+  controller_1_values[RY] = Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
 
   // Digital Buttons
   controller_1_values[A] = Controller_1.get_digital(pros::E_CONTROLLER_DIGITAL_A);
@@ -60,6 +62,9 @@ void update_controller_values(void *)
   controller_2_values[L2] = Controller_2.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
   controller_2_values[R1] = Controller_2.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
   controller_2_values[R2] = Controller_2.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+
+  pros::delay(10);
+}
 }
 
 void update_sensor_values(void *)
@@ -69,28 +74,83 @@ void update_sensor_values(void *)
 
 void Profile::set_layout(std::string profile_file_name)
 {
+  FILE* usd_file_write = fopen("/usd/example.txt", "w");
+  fputs("Example text", usd_file_write);
+  fclose(usd_file_write);
+
+  std::cout << "setting layout\n";
   std::string line;
-  std::ifstream profile_file( "profile-" + profile_file_name + ".csv" );
+  char filepath[1000];
+  strcpy(filepath, "/usd/");
+  strcat(filepath, profile_file_name.c_str());
+  strcat(filepath, ".csv");
+  std::cout << "Before open: File:" << filepath << "\n";
+  FILE* profile_file = fopen(filepath, "r");
   std::string controller_num;
   std::string action;
   std::string value;
   std::pair<pros::Controller*, controller_input> ci;
 
-  if (profile_file)  // same as: if (profile_file.good())
+  std::cout << "File:" << filepath << "\n";
+
+  if (profile_file != NULL)  // same as: if (profile_file.good())
   {
-    while (getline(profile_file, controller_num, ','))
+    std::cout << "Found File\n";
+    char *controller_numc = NULL;
+    char *actionc = NULL;
+    char *valuec = NULL;
+
+    size_t len = 0;
+    ssize_t read;
+
+    int itt = 0;
+    int last_action_len = 0;
+    int last_value_len = 0;
+
+    while ((read=__getdelim(&controller_numc,&len,',',profile_file))!= -1)//(profile_file, controller_num, ','))
     {
+
+      //std::cout << "===================Start Itteration " << (itt + 1) <<"==================\n";
+      std::cout << "Found Line: " << controller_numc;
       //cout << "ID: " << ID << " " ;
 
-      getline(profile_file, action, ',');
-
-      getline(profile_file, value);
+      __getdelim(&valuec,&len,',',profile_file);
       //cout << "Sexo: " <<  genero<< " "  ;
+      std::cout << valuec << "\n";
+
+      __getline(&actionc,&len,profile_file);
+      std::cout << actionc;
+      std::cout << ", ";
+
+      controller_num.assign(controller_numc);
+      action.assign(actionc);
+      value.assign(valuec);
+
+
+
+
+
+
 
       if(!value.empty())
       {
+
+
+        controller_num = controller_num.substr(0, 12);
+        action = action.substr(0, action.length()-1);
+        value = value.substr(0, value.length()-1);
+        //std::cout << "Controller_num: " << controller_num << "\n";
+        //std::cout << "value: " << value << "\n";
+        //std::cout << "action: " << action << "\n";
+
+
+        //std::cout << " Cont 1 comp: " << controller_num.compare("Controller 1");
         if(controller_num.compare("Controller 1") == 0)
         {
+          //std::cout << "Controller 1 Selected!\n";
+          //std::cout << value << "\n";
+          //std::cout << "Value: " << value << " End value\n";
+
           if(value.compare("LX") == 0)      ci = std::make_pair(&Controller_1,LX);
           else if(value.compare("LY") == 0) ci = std::make_pair(&Controller_1,LY);
           else if(value.compare("RX") == 0) ci = std::make_pair(&Controller_1,RX);
@@ -108,10 +168,21 @@ void Profile::set_layout(std::string profile_file_name)
           else if(value.compare("R1") == 0) ci = std::make_pair(&Controller_1,R1);
           else if(value.compare("R2") == 0) ci = std::make_pair(&Controller_1,R2);
 
+          action = action.substr(0, action.length()-1);
+
           for(int i = 0; i < sizeof(action_list)/sizeof(*action_list); i++)
           {
+            //std::cout << "Controller_num: " << controller_num << "\n";
+            //std::cout << "value: " << value << "\n";
+            //std::cout << "action: " << action << "\n";
+
+            //std::cout << "Action: " << action << "; Action List: " << action_list[i] << "\n";
+
+            //std::cout << action_list[i] << " vs " << action << ": " <<action.compare(action_list[i]) << "\n";
+
             if(action.compare(action_list[i]) == 0)
             {
+              //std::cout << action_list[i] << " mapped!\n";
               button_map[action_list[i]] = ci;
             }
           }
@@ -139,22 +210,36 @@ void Profile::set_layout(std::string profile_file_name)
           {
             if(action.compare(action_list[i]) == 0)
             {
+              //std::cout << action_list[i] << " mapped!\n";
               button_map[action_list[i]] = ci;
             }
           }
         }
-
+/*
         for(int i = 0; i < sizeof(action_list)/sizeof(*action_list); i++)
         {
           if(!button_map.count(action_list[i])) // Action not assigned to btn map
           {
             button_map[action_list[i]] = std::make_pair(&Controller_1,Not_Assigned);
           }
-        }
+        }*/
+
       }
+      itt++;
+
+      //memset(controller_numc, 0, );
+      //memset(actionc, 0, 13);
+      //memset(valuec, 0, 13);
+
+
+
     }
-    profile_file.close();
+    free(controller_numc);
+    free(actionc);
+    free(valuec);
+    fclose(profile_file);
   }
+  else {std::cout << "File not found\n";}
 }
 
 Profile::Profile(std::string profile_file_name)

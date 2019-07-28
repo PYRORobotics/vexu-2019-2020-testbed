@@ -18,21 +18,48 @@ void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor left_mtr(1);
 	pros::Motor right_mtr(2);
+	Profile DefaultProf;
 	Profile BrandonProf("profile-Brandon");
 
-	Active_Profile = BrandonProf;
+	Active_Profile = DefaultProf;
 
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+		if(Controller_1.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))
+		{
+			Active_Profile = DefaultProf;
+			pros::lcd::print(3, "Default Profile Loaded");
+		}
+		else if(Controller_1.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B))
+		{
+			Active_Profile = BrandonProf;
+			pros::lcd::print(3, "Brandon Profile Loaded");
+		}
+		pros::lcd::print(0, "%d %d %d", (Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)) >> 2,
+		                 (Active_Profile.button_map["Drive 2"].second) >> 1,
+		                 (controller_1_values[Active_Profile.button_map["Drive 2"].second]) >> 0);
+
+
+		left_mtr = 100;//Controller_1.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+		//std::cout << "Speed: " << "\n";
+		//std::cout << Active_Profile.button_map["Drive 2"].second << "\n";
 
 		// driveLift(controller_2_values[LY]); //-127->127
-		if(Active_Profile.button_map["drive"].second != Not_Assigned)
+		if(Active_Profile.button_map["Drive 2"].second != Not_Assigned)
 		{
-			right_mtr = (Active_Profile.button_map["drive"].first == &Controller_1)?
-			 						controller_1_values[Active_Profile.button_map["drive"].second]:
-									controller_2_values[Active_Profile.button_map["drive"].second];
+
+			int speed = (Active_Profile.button_map["Drive 2"].first == &Controller_1)?
+			 						controller_1_values[Active_Profile.button_map["Drive 2"].second]:
+									controller_2_values[Active_Profile.button_map["Drive 2"].second];
+
+									std::cout << speed << "\n";
+
+
+			right_mtr = speed;
+		}
+		else
+		{
+			std::cout << "NOT FOUND" << "\n";
 		}
 
 
