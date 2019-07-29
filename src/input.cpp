@@ -63,7 +63,7 @@ void update_controller_values(void *)
   controller_2_values[R1] = Controller_2.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
   controller_2_values[R2] = Controller_2.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
 
-  pros::delay(10);
+  pros::delay(20);
 }
 }
 
@@ -278,4 +278,39 @@ void save_run(void*)
 
 	pros::delay(20);
 }
+}
+
+bool isInPlayback;
+
+void playback_run(std::string filename)
+{
+  isInPlayback = true;
+  char filepath[1000];
+  strcpy(filepath, "/usd/");
+  strcat(filepath, filename.c_str());
+  strcat(filepath, ".csv");
+  int btnvalue;
+
+  char *val = NULL;
+  size_t len = 0;
+  ssize_t read;
+
+  FILE* save_file = fopen(filepath, "r");
+  while((read=__getdelim(&val,&len,',',save_file))!= -1)
+  {
+
+    for(int i = LX; i < R2; i++)
+    {
+      controller_input foo = static_cast<controller_input>(i);
+      btnvalue = atoi(val);
+      controller_1_values[foo] = btnvalue;
+      __getdelim(&val,&len,',',save_file);
+    }
+    //__getline(&val,&len,save_file);
+    btnvalue = atoi(val);
+    controller_1_values[R2] = btnvalue;
+
+    pros::delay(20);
+  }
+  isInPlayback = false;
 }

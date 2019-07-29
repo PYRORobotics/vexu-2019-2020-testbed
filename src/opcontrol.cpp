@@ -1,5 +1,22 @@
 #include "main.h"
 
+pros::Task update_controller_values_task(update_controller_values, NULL);
+
+void playback(void*)
+{
+	while(1)
+	{
+		if(Controller_1.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+		{
+			update_controller_values_task.suspend();
+			playback_run("last_saved_run");
+		}
+		if(!isInPlayback)
+		{
+			update_controller_values_task.resume();
+		}
+	}
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -15,7 +32,7 @@
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Task update_controller_values_task(update_controller_values, NULL);
+	pros::Task playback_task(playback, NULL);
 	pros::Task save_run_task(save_run, NULL);
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor left_mtr(1);
