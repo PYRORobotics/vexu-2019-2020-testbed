@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -15,6 +16,7 @@
  */
 void opcontrol() {
 	pros::Task update_controller_values_task(update_controller_values, NULL);
+	pros::Task save_run_task(save_run, NULL);
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor left_mtr(1);
 	pros::Motor right_mtr(2);
@@ -52,7 +54,7 @@ void opcontrol() {
 			 						controller_1_values[Active_Profile.button_map["Drive 2"].second]:
 									controller_2_values[Active_Profile.button_map["Drive 2"].second];
 
-									std::cout << speed << "\n";
+									//std::cout << speed << "\n";
 
 
 			right_mtr = speed;

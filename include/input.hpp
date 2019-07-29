@@ -34,11 +34,13 @@ extern std::map<controller_input, int> controller_2_values;
 
 extern void update_controller_values(void *);
 extern void update_sensor_values(void *);
+extern void save_run(void *);
 
 class Profile
 {
   private:
     std::string profile_file_name;
+
   public:
     std::string drive_type;
     std::map<std::string, std::pair<pros::Controller*, controller_input> >button_map;
@@ -47,6 +49,8 @@ class Profile
 };
 
 extern Profile Active_Profile;
+extern bool isSaving;
+extern FILE* save_file;
 
 
 #endif

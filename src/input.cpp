@@ -74,10 +74,6 @@ void update_sensor_values(void *)
 
 void Profile::set_layout(std::string profile_file_name)
 {
-  FILE* usd_file_write = fopen("/usd/example.txt", "w");
-  fputs("Example text", usd_file_write);
-  fclose(usd_file_write);
-
   std::cout << "setting layout\n";
   std::string line;
   char filepath[1000];
@@ -246,4 +242,40 @@ Profile::Profile(std::string profile_file_name)
 {
   this->profile_file_name = profile_file_name;
   set_layout(this->profile_file_name);
+}
+
+
+
+bool isSaving = false;
+FILE* save_file;
+
+void save_run(void*)
+{
+  while(1){
+	if(Controller_1.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+	{
+		isSaving = !isSaving;
+    pros::delay(500);
+	}
+  if(isSaving == true)
+  {
+    //std::cout << "Start saving!!!\n";
+    save_file = fopen("/usd/last_saved_run.csv", "a");
+
+    for(int i = LX; i <= R2; i++)
+    {
+      controller_input foo = static_cast<controller_input>(i);
+      char value[4];
+      itoa(controller_1_values[foo], value, 10);
+      fputs(value, save_file);
+      fputs(",", save_file);
+    }
+    fputs("\n", save_file);
+
+
+    fclose(save_file);
+  }
+
+	pros::delay(20);
+}
 }
