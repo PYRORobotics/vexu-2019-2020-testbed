@@ -18,14 +18,13 @@ void opcontrol() {
 	pros::Motor left_mtr(1);
 	pros::Motor right_mtr(2);
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
-
-		left_mtr = left;
-		right_mtr = right;
+		if(master.get_digital(DIGITAL_A)){
+		    left_mtr.move(127);
+		}
+		else{
+            left_mtr.move(0);
+		}
+		printf("motor current: %fmA", left_mtr.get_current_draw());
 		pros::delay(20);
 	}
 }
