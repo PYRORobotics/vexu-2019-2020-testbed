@@ -2,6 +2,9 @@
 bin/
 compile_commands.json
 temp.log
-.idea/
 
+
+.idea/
+CMakeLists.txt
 src/patch.c
+cmake-build-debug/
